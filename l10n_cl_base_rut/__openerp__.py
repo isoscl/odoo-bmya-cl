@@ -2,7 +2,7 @@
 {
     'author': u'Blanco Martín & Asociados',
     'category': 'Localization/Chile',
-    'depends': ['base_vat','l10n_cl_vat'],
+    'depends': ['base_vat'],
     'description': u'''\n\nIncorporate a field with the RUT (VAT) formatted 
 according chilean customs.\n\n''',
     'installable': True,
@@ -10,7 +10,7 @@ according chilean customs.\n\n''',
     'name': 'VAT Localization Chile',
     'test': [],
     'update_xml': [],
-    'version': '8.0.1',
+    'version': '1.0',
     'website': 'https://blancomartin.cl',
     'auto-install': False,
     'active': False
