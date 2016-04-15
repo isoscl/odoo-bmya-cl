@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-# Chilean SII Partner Activities
+# Chilean Payroll
 # Odoo / OpenERP, Open Source Management Solution
-# By Blanco Martín & Asociados - (http://blancomartin.cl).
+# Copyright (c) 2015 Blanco Martin y Asociados
+# Nelson Ramírez Sánchez - Daniel Blanco
+# http://blancomartin.cl
 #
 # Derivative from Odoo / OpenERP / Tiny SPRL
 #
@@ -28,30 +30,49 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
 ##############################################################################
-
-from openerp import models, fields, api
-
-
-class invoice_turn(models.Model):
-    _inherit = "account.invoice"
+from tools import amount_to_text_en
+from openerp.osv import osv
+from openerp.report import report_sxw
+from openerp.addons.l10n_cl_hr_payroll.report import payslip_report
 
 
-    @api.multi
-    @api.depends('partner_id')
-    def _get_available_turns(self):
-        self.ensure_one()
-        available_turn_ids = self.partner_id.partner_activities_ids
-        for turn in available_turn_ids:
-            self.invoice_turn = turn.id
+class payslip_report(payslip_report.payslip_report): :
+
+    def __init__(self, cr, uid, name, context):
+        super(payslip_report, self).__init__(cr, uid, name, context)
+        self.localcontext.update({
+            'get_payslip_lines': self.get_payslip_lines,
+        })
+
+    def get_payslip_lines(self, obj):
+        payslip_line = self.pool.get('hr.payslip.line')
+        res = []
+        ids = []
+        for id in range(len(obj)):
+            if obj[id].appears_on_payslip is True:
+                ids.append(obj[id].id)
+        if ids:
+            res = payslip_line.browse(self.cr, self.uid, ids)
+        return res
+
+      def convert(self, amount):
+          amt_en = amount_to_text_en.amount_to_text(amount, 'en', 'CLP')
+          return amt_en
 
 
-    invoice_turn = fields.Many2one(
-        'partner.activities',
-        'Giro Receptor',
-        readonly=True,
-        store=True,
-        states={'draft': [('readonly', False)]},
-        compute=_get_available_turns)
+class wrapped_report_payslip(osv.AbstractModel):
+    _name = 'report.l10_cl_hr_payroll.report_payslip'
+    _inherit = 'report.abstract_report'
+    _template = 'l10_cl_hr_payroll.report_payslip'
+    _wrapped_report_class = payslip_report
+
+# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+
+
+
+
+
 
 
 
